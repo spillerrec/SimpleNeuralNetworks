@@ -38,6 +38,8 @@ class NeuralNetwork{
 	public:
 		NeuralNetwork( const std::vector<int>& layer_sizes );
 		FeedForwardLayer operator()( const FeedForwardLayer& ) const;
+		
+		void backpropagate( const FeedForwardLayer&, const FeedForwardLayer& );
 };
 
 }
