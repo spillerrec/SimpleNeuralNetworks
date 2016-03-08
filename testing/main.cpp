@@ -15,9 +15,9 @@ int main( int argc, char *argv[] ){
 	x1 << -1, -1; y1 << -1;
 	x2 << -1, +1; y2 << +1;
 	x3 << +1, -1; y3 << +1;
-	x4 << +1, +1; y4 << +1;
+	x4 << +1, +1; y4 << -1;
 	
-	for( int i=0; i<10000; i++ ){
+	for( int i=0; i<100000; i++ ){
 		net.backpropagate( x1, y1 );
 		net.backpropagate( x2, y2 );
 		net.backpropagate( x3, y3 );

@@ -17,10 +17,10 @@ NeuralNetwork::NeuralNetwork( const vector<int>& layer_sizes ){
 	}
 }
 
-Weights NeuralNetwork::initializeWeights( int previous, int next ){ //TODO: pass rnd generator
+NeuralNetwork::Layer NeuralNetwork::initializeWeights( int previous, int next ){ //TODO: pass rnd generator
 	auto w = Weights::Random( previous, next );
 	//TODO: scale properly
-	return w;
+	return { w, FeedForwardLayer::Random( next ) };
 }
 
 static float hyperbolicTangent( float x ){
@@ -42,7 +42,8 @@ static void applyDerivation( FeedForwardLayer& hidden ){
 FeedForwardLayer NeuralNetwork::operator()( const FeedForwardLayer& input ) const{
 	FeedForwardLayer hidden = input;
 	for( auto& w : weights ){
-		hidden *= w;
+		hidden *= w.weight;
+		hidden += w.bias;
 		applyActivation( hidden );
 	}
 	
@@ -62,7 +63,9 @@ void NeuralNetwork::backpropagate( const FeedForwardLayer& input, const FeedForw
 	auto hidden = input;
 	for( auto& w : weights ){
 		Cache cache;
-		cache.s = (hidden *= w);
+		hidden *= w.weight;
+		hidden += w.bias;
+		cache.s = hidden;
 		applyActivation( hidden );
 		cache.z = hidden;
 		values.push_back( cache );
@@ -74,12 +77,14 @@ void NeuralNetwork::backpropagate( const FeedForwardLayer& input, const FeedForw
 	float learning_rate = 0.01;
 	for( int i=values.size()-2; i>0; i-- ){ //Skip first and last layer
 		//Calculate delta D1 = f'( S1 ) . W1->2 * D2^T
-		values[i].d = weights[i] * values[i+1].d.transpose();
+		values[i].d = weights[i].weight * values[i+1].d.transpose();
 		applyDerivation( values[i].s );
 		values[i].d.array() *= values[i].s.array();
 	}
 	
 	//Update weights W1 = W1 - n * Z^T * D2
-	for( unsigned i=0; i<values.size()-1; i++ )
-		weights[i] -= learning_rate * ( values[i].z.transpose() * values[i+1].d );
+	for( unsigned i=0; i<values.size()-1; i++ ){
+		weights[i].weight -= learning_rate * ( values[i].z.transpose() * values[i+1].d );
+	//	weights[i].bias   -= learning_rate *   /*          1        */   values[i+1].d  * 0.0;
+	}
 }

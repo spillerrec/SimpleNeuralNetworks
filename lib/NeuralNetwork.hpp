@@ -4,7 +4,7 @@
 #ifndef NEURAL_NETWORK_HPP
 #define NEURAL_NETWORK_HPP
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 #include <vector>
 
@@ -17,9 +17,13 @@ using Weights = Eigen::MatrixXf;
 
 class NeuralNetwork{
 	private:
-		std::vector<Weights> weights;
+		struct Layer{
+			Weights weight;
+			FeedForwardLayer bias;
+		};
+		std::vector<Layer> weights;
 		
-		Weights initializeWeights( int previous, int next );
+		Layer initializeWeights( int previous, int next );
 		
 	public:
 		NeuralNetwork( const std::vector<int>& layer_sizes );
